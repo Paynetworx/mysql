@@ -290,7 +290,11 @@ func (mc *mysqlConn) auth(authData []byte, plugin string) ([]byte, error) {
 		// encrypted password
 		enc, err := encryptPassword(mc.cfg.Passwd, authData, pubKey)
 		return enc, err
-
+	case "dialog":
+		if !mc.cfg.AllowCleartextPasswords {
+			return nil, ErrCleartextPassword
+		}
+		return append([]byte(mc.cfg.Passwd), 0), nil
 	default:
 		errLog.Print("unknown auth plugin:", plugin)
 		return nil, ErrUnknownPlugin
